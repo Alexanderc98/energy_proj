@@ -3,6 +3,8 @@
 * test
 
 ## Code and Resources Used
+**Data:** https://data.cityofnewyork.us/Environment/Energy-Usage-From-DOE-Buildings/mq6n-s45c
+
 **Python Version:** 3.79
 
 **R Version:** 4.1.3
@@ -13,13 +15,13 @@
 
 **Packages:** stringr, pandas, sqlite3
 
-## Web Scraping
-I downloading the data from https://data.cityofnewyork.us/Environment/Energy-Usage-From-DOE-Buildings/mq6n-s45c. With each building, we got the following:
+## Initial Data
+With each building, we got the following data:
 
 * test
 
 ## Data Cleaning
-After downloading the data from https://data.cityofnewyork.us/Environment/Energy-Usage-From-DOE-Buildings/mq6n-s45c, I made the following changes and created the following variables:
+After downloading the data, I made the following changes and created the following variables:
 
 * test
 
