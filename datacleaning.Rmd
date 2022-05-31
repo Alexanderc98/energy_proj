@@ -1,0 +1,242 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+```{r}
+df <- read.csv('Energy_Usage_From_DOE_Buildings.csv') #Reading in data
+```
+
+
+Exploring data
+
+```{r}
+head(df)
+```
+
+Removing unneeded columns for my analysis
+
+```{r}
+df$X. <- NULL
+df$X_ <- NULL
+```
+
+```{r}
+str(df)
+```
+
+Removing more unneeded columns
+
+```{r}
+df$May.12 <- NULL
+df$Jun.12 <- NULL
+df$BIN <- NULL
+df$BBL <- NULL
+df$Community.Board <- NULL
+df$Council.District <- NULL
+df$Census.Tract <- NULL
+```
+
+1- Manhattan,  2- Bronx,  3- Brooklyn, 4 - Queens, 5- Staten Island, 6 - Citywide, 7- Out of City
+
+What the difference borough numbers means.
+```{r}
+df$Borough[df$Borough == 1] <- 'Manhattan'
+df$Borough[df$Borough == 2] <- 'Bronx'
+df$Borough[df$Borough == 3] <- 'Brooklyn'
+df$Borough[df$Borough == 4] <- 'Queens'
+df$Borough[df$Borough == 5] <- 'Staten Island'
+df$Borough[df$Borough == 6] <- 'Citywide'
+df$Borough[df$Borough == 7] <- 'Out of City'
+```
+
+
+Renaming column to a better name.
+```{r}
+df$area_name <- df$NTA
+df$NTA <- NULL
+```
+
+
+Removing all rows that doesnt measure energy usage
+```{r}
+df <- df[df$Measurement == 'Electricity Usage (KWH)',]
+```
+
+
+Checking how many unique building adresses there are
+```{r}
+length(unique(df$Building.Address))
+```
+
+Creating all the dates for my new dataframe
+```{r}
+dates <- c(rep(seq(from = as.Date("2008-07-01"), to = as.Date("2012-04-01"), by = 'month'), 36))
+```
+
+
+Getting all the adressnames in order so it fits with the dates for my new dataframe
+```{r}
+l <- c()
+l <- as.list(l)
+i=1
+i <- 1
+while(i <= length(unique(df$Building.Address))){
+  b <- rep(unique(df$Building.Address)[[i]], 46)
+  l <- c(l,b)
+  i=i+1
+}
+```
+
+
+Creating the new dataframe with all the dates
+```{r}
+new_df <- as.data.frame(dates, axis=2)
+```
+
+Adding all the adresses to the new dataframe
+```{r}
+new_df$adress <- l
+```
+
+Adding all the columns i want in the new df
+```{r}
+new_df$electricity_costs_usd <- NA
+new_df$borough <- NA
+new_df$area_name <- NA
+new_df$postcode <- NA
+new_df$latitude <- NA
+new_df$longitude <- NA
+```
+
+
+
+Getting all the electricity costs per month from the old dataframe to the new dataframe
+
+```{r}
+l <- c()
+l <- as.list(l)
+i <- 1
+
+while(i <= length(unique(df$Building.Address))){
+  j <- 1
+  while(j <= 46){ #There are only 46 months of data
+    b <- t(df[i,4:49])[[j]]
+    l <- c(l,b)
+    j=j+1
+  }
+  i=i+1
+}
+
+new_df$electricity_costs_usd <- l #Adding the data to my new dataframe
+```
+
+Now it's time to add all the other missing values
+
+```{r}
+df$adress <- df$Building.Address #Making the both dataframes have the same name for adress
+df$Building.Address <- NULL #Removing the old column
+```
+
+```{r}
+tmp <- merge(df, new_df, by = "adress")
+
+new_df$area_name <- tmp$area_name.x
+new_df$latitude <- tmp$Latitude
+new_df$longitude <- tmp$Longitude
+new_df$postcode <- tmp$Postcode
+new_df$borough <- tmp$Borough
+```
+
+Removing unwanted data and renaiming new_df to df
+
+```{r}
+df <- new_df
+```
+
+```{r}
+remove(new_df)
+remove(l)
+remove(tmp)
+remove(b)
+remove(dates)
+remove(i)
+remove(j)
+```
+
+Converting df columns to the right types
+```{r}
+df$adress <- as.character(df$adress)
+df$electricity_costs_usd <- as.numeric(df$electricity_costs_usd)
+df$borough <- as.factor(df$borough)
+df$area_name <- as.factor(df$area_name)
+```
+
+```{r}
+summary(df)
+```
+
+Time for some feature engineering of the adress column name, from that i can get building name and keep the adress.
+
+```{r}
+df$building_name <- NA
+
+library(stringr)
+
+df$building_name <- str_extract(df$adress, "\\[([^]]+)\\].*") #extracting clammers and whats inside them
+
+df$building_name <- str_replace(df$building_name, "\\[([^]]+)\\].*", "\\1") #Removing clammers
+
+df$building_name[df$building_name =='110 Chester St'] <- 'Dr. Rose B. English' #Renaming the building to the right name from my own manual research.
+
+df$adress <- str_extract(df$adress, ".*(?=\\[)") #removes everything efter the first clammer and the clammer
+
+df$adress <- trimws(df$adress) #Trimming leading and ending whitespaces
+df$building_name <- trimws(df$building_name) #Trimming leading and ending whitespaces
+df$area_name <- trimws(df$area_name) #Trimming leading and ending whitespaces
+
+df$building_name <- gsub("?", "", df$building_name, fixed = TRUE) #Removing a trailing "?" that was after some building names
+
+df$adress[df$adress =='111 Bristol St [110 Chester St]'] <- '111 Bristol St' #Fixing this manually
+```
+
+Now It's time to rename df$dates to df$date
+
+```{r}
+df$date <- df$dates
+df$dates <- NULL
+```
+
+Checking if there are any duplicates
+
+```{r}
+n_occur <- data.frame(table(df$building_name))
+
+n_occur[n_occur$Freq > 46,]
+```
+Giving both the names an unique identifier
+
+```{r}
+unique(df[df$building_name == 'Roberto Clemente School', c('building_name', 'area_name')])
+```
+```{r}
+df$building_name[df$building_name == 'Roberto Clemente School' & df$area_name == 'Highbridge'] <- 'Roberto Clemente School	(Highbridge)'
+
+df$building_name[df$building_name == 'Roberto Clemente School' & df$area_name == 'Kingsbridge Heights'] <- 'Roberto Clemente School	(Kingsbridge Heights)'
+```
+
+```{r}
+remove(n_occur) #dont need this anymore
+```
+
+
+```{r}
+summary(df)
+```
+It looks good! Time to export the cleaned data to a csv file, for further manipulation in excel!
+
+```{r}
+write.csv(df, file = 'cleaned_data.csv', row.names = F)
+```
+
