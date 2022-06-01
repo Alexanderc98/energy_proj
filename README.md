@@ -21,7 +21,11 @@
 ## Data Cleaning
 After downloading the data, I made the following changes and created the following variables:
 
-* test
+* Removed unnecessary columns needed to conduct my analysis
+* Renamed columns so their name better reflect the content
+* Transformed the data so that dates were rows and not columns
+* Feature engineered the building name from the adress column
+* Separated the data to four different sheets and removed duplicates in microsoft excel, so that I could create a great relational database
 
 ## EDA
 Below are a few highlights of my exploratory analysis.
