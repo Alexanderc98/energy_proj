@@ -33,7 +33,7 @@ Below are a few highlights of my exploratory analysis.
 ![alt text](https://github.com/Alexanderc98/energy_proj/blob/main/pictures/state_owned_buildings_visualised.PNG "state_owned_buildings_visualised")
 
 
-![alt text](https://github.com/Alexanderc98/energy_proj/blob/main/pictures/average_monthly_electricity_bill_per_borough.PNG "average_monthly_electricity_bill_per_borough")
+![alt text](https://github.com/Alexanderc98/energy_proj/blob/main/pictures/average_monthly_electricity_bill_per_borough_with_usd.PNG "average_monthly_electricity_bill_per_borough")
 
 
 ![alt text](https://github.com/Alexanderc98/energy_proj/blob/main/pictures/average_yearly_energy_bill_per_building.PNG "average_yearly_energy_bill_per_building")
